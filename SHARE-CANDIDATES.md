@@ -36,6 +36,8 @@ outlives any file deletion. Paths and types only:
 | Committed browser profile (Cookies, Login Data, History DBs) | agent4wiki `\\wsl.localhost\…\lighthouse.*/Default/` (junk dir from an unset-env WSL path) | Delete, purge history, fix the script to use a Linux tmp dir |
 | Partial bot token echoed to logs | agent4wiki `start-v4.sh:28` | Stop echoing; rotate if any log was shared |
 | Secrets recorded as resolved incidents | `errors/INDEX.md:17,38,59` (CF token, bot token + mail key, CF token) | Confirm all were rotated |
+| Real phone number (self-flagged "must remove") | skills repo `keychain/SKILL.md:119` | Remove from the file |
+| Internal IPs + chat id + inbox, SSH key paths, private API endpoint, a second home path | skills repo `keychain/SKILL.md:120`, `handshake/SKILL.md:112,142`, `google/SKILL.md:10-17`, `image-gen/SKILL.md:16,32`, `chrome-human/SKILL.md` | Identifiers, not live tokens — strip before any of these skills ship (see §4/§7) |
 
 Then: turn on GitHub **secret scanning + push protection**, add `tmp/`, `*.pid`,
 `*.db`, `*.bak*` to `.gitignore`, and `git rm --cached` what's already tracked
@@ -142,16 +144,44 @@ ship both scripts), `pravopis-slovenija` (generalize to "proofread HTML in langu
 `website-builder` (**instrument every site with Clarity+GA4+GSC before launch** +
 "don't block AI crawlers" — placeholder the real name/domain/handles in the JSON-LD).
 
-### Generic prompt skills (bundle as one small pack)
+### By family (from the a–l inventory — mostly clean, group into small packs)
 
-`challenger`, `decompose`, `first-principles`, `expert`, `architect` — UNPROVEN (no
-tests) but clean and generic. Publish as a "thinking prompts" pack, clearly labelled
-as prompt scaffolds, not tools.
+Grouping keeps each publishable unit coherent and one-job. Most of these carry only
+the ubiquitous home-path / agent-name / chat-id wiring to strip; per-skill exceptions
+are noted.
 
-> The full a–l skill inventory is being finalised by a separate reviewer and will be
-> folded in here; the a–l high-value skills already covered above (plan-skill,
-> code-skill, janitor, doit-skill, claude-mentor, keychain) come through the tooling
-> and M–Z reports.
+- **Build discipline** (PROVEN): `code-skill` (pre/during/post build gates),
+  `janitor` (the canonical audit engine — dead code, secrets, wiring, scope; other
+  skills point at it rather than re-implement), `doit-skill` (implement-to-done with
+  honest verification + subagent-distrust), `code-audit` (structured good/bad/ugly
+  review), `build-app` (plan→mockup→build→test). Zero meaningful PII (only internal
+  ERR ids). Strong candidates as a "build-discipline" pack.
+- **Plan interrogation** (thinking scaffolds, clean): `grill-me` and `grill-with-docs`
+  (relentless one-question-at-a-time plan stress-test, the second tied to a glossary/
+  ADRs), `challenger` (adversarial partner), `architect` (idea→implementation plan),
+  `decompose`, `first-principles`, `expert`. UNPROVEN as tools — publish as a labelled
+  prompt pack.
+- **Design / frontend** (PROVEN, near-zero PII): `_hot-skills/pixel-perfect`
+  (screenshot→code with quality gates, score 5), `_hot-skills/visual-redesign`
+  (CSS-only aesthetic upgrade that leaves JS untouched, score 5),
+  `_hot-skills/awwwards-hero`, `_hot-skills/awwwards-motion`,
+  `_hot-skills/imagegen-frontend`, `app-design`. (Anthropic's `frontend-design` is
+  third-party — §7.)
+- **Utilities** (PROVEN unless noted): `fixmath` (re-derive and check every number in
+  a doc — score 5, strip chat id), `caveman` (ultra-terse token-saving output mode,
+  clean), `cron-manager` (durable systemd user-timer scheduling), `gui-builder` (wrap
+  a CLI in a FastAPI dashboard), `large-docs` (chunk/RAG for oversized docs),
+  `claude-mentor` (Claude Code internals/version reference; strip the localhost proxy
+  addr), `ai-seo` (earn citations in AI answers), `book2skill` (turn a method into a
+  SKILL.md), `ideas-log` / `ideas-to-project` (idea capture→triage→validated project).
+- **`_super-agents`** — a shared honesty/verification core (`00-FABLE-CORE`) prepended
+  to 19 role prompts. The reusable part is the **core**, not the 19 personas. Publish
+  the core as a role-prompt template; strip home paths, the owner's name, ERR ids and
+  the "Fable/super-agent" branding.
+
+**Marketing/agency skills** (`fb-ads`, `google-ads`, `cold-emailing`, `copy`,
+`design-workflow`, `geo-track`) are shareable in principle but lean on business
+context; publish only if a genuinely generic version survives the strip.
 
 ---
 
@@ -270,12 +300,15 @@ each is backed by a real, on-the-record incident.
 
 **Third-party — attribute and link, never republish as ours.**
 Anthropic public skills (`docx`, `pdf`, `xlsx`, `skill-creator`, `mcp-builder`,
-`web-artifacts-builder`, `webapp-testing`); Fabric/danielmiessler (`offer-builder`,
-`humanizer` and the `extract-wisdom`-style ones); `seo-audit` (coreyhaines31);
-`openmontage` (**AGPL-3.0** — do not mix into an MIT repo); `video-use`,
-`autoresearch` (Karpathy) — need their upstream licenses; all `gstack` symlink skills
-(third-party pack, not present). `openai-skill` is distilled from OpenAI's public guide
-— rewrite in our own words and cite it, or skip.
+`web-artifacts-builder`, `webapp-testing`, `frontend-design`, `doc-coauthoring`,
+`internal-comms`); Fabric/danielmiessler (`offer-builder`, `humanizer`,
+`analyze-claims`, `digest`, `extract-wisdom`); `seo-audit` (coreyhaines31);
+`compare-models` and the ~24 `gstack` symlink skills (third-party pack, not present —
+`autoplan`, `benchmark`, `browse`, `canary`, `careful`, `codex`, `context-save`,
+`design-review`, `investigate`, `ship`, … all SKIP); `openmontage` (**AGPL-3.0** — do
+not mix into an MIT repo); `video-use`, `autoresearch` (Karpathy) — need their upstream
+licenses. `openai-skill` and `book2skill` are distilled from others' work (an OpenAI
+guide; a named creator's method) — rewrite in our own words and cite, or skip.
 
 **Unsafe / dual-use.**
 `win10exploits` (references unpatched zero-days + an LPE chain + a live LAN target —
@@ -284,7 +317,10 @@ do not publish, and review whether keeping it locally is intended); `tmux_comman
 poller that races the plugin). `redteam` is general, defensively-framed security
 education with an authorization gate — shareable *as a principle* with the gate and
 refusals kept prominent; `twitter` humanization is anti-bot-detection platform
-automation — judge ToS before sharing, at most the timing principle.
+automation — judge ToS before sharing, at most the timing principle. Also SKIP the
+skills a reviewer set aside as sensitive on the same grounds — `chrome-human`,
+`humanize`, `humanizer` (detector evasion / human-mimicking automation), `instagram`,
+`karma-builder` (platform gaming / fake engagement), and `doc-builder`.
 
 **Grey-area / terms-of-service — don't present as best practice.**
 Reusing the Claude Code subscription **OAuth token as an API key** in custom scripts;
