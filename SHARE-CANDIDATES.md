@@ -23,26 +23,24 @@ which are almost wiring-free and broadly useful.
 
 ---
 
-## 0. Do this first — rotate leaked credentials (not a publishing task)
+## 0. Do this first — rotate leaked credentials (handled privately)
 
-Independent reviewers found these in the **private** repos. They must be rotated
-and purged from git history regardless of what gets published, because history
-outlives any file deletion. Paths and types only:
+Reviewers found live secrets committed in the **private** repos — Telegram bot
+tokens (auto-filed into error logs from exception URLs), a Cloudflare API token, a
+committed browser profile with cookie/login databases, and a couple of secrets
+recorded inside resolved-incident notes. These must be rotated and purged from git
+history regardless of what gets published, because history outlives any file deletion.
 
-| What | Where (private repos) | Action |
-|------|----------------------|--------|
-| Telegram bot tokens (2 bots) | `errors/resolved/ERR-268/269/274/275/280/281.md:13`; `plans/maintenance-system-fix-v1.2.md:361,375` — leaked via HTTP exception text the error tracker auto-filed | Rotate via BotFather; purge history; redact URLs before logging (see lesson L23) |
-| Cloudflare API token (+ account/zone IDs) | `knowledge/fable-infra-access.md:151,184`; `knowledge/cloudflare-tokens.md` | Rotate; purge |
-| Committed browser profile (Cookies, Login Data, History DBs) | agent4wiki `\\wsl.localhost\…\lighthouse.*/Default/` (junk dir from an unset-env WSL path) | Delete, purge history, fix the script to use a Linux tmp dir |
-| Partial bot token echoed to logs | agent4wiki `start-v4.sh:28` | Stop echoing; rotate if any log was shared |
-| Secrets recorded as resolved incidents | `errors/INDEX.md:17,38,59` (CF token, bot token + mail key, CF token) | Confirm all were rotated |
-| Real phone number (self-flagged "must remove") | skills repo `keychain/SKILL.md:119` | Remove from the file |
-| Internal IPs + chat id + inbox, SSH key paths, private API endpoint, a second home path | skills repo `keychain/SKILL.md:120`, `handshake/SKILL.md:112,142`, `google/SKILL.md:10-17`, `image-gen/SKILL.md:16,32`, `chrome-human/SKILL.md` | Identifiers, not live tokens — strip before any of these skills ship (see §4/§7) |
+The exact file locations are deliberately **not listed in this public repo** — that
+would be a map to your secrets. They're in a separate private credential-rotation
+report (delivered out-of-band) with rotation steps and a `git filter-repo` recipe.
 
-Then: turn on GitHub **secret scanning + push protection**, add `tmp/`, `*.pid`,
-`*.db`, `*.bak*` to `.gitignore`, and `git rm --cached` what's already tracked
-(`.gitignore` does not untrack — lesson L30). Run `gitleaks`/`trufflehog` over
-full history before making any repo public.
+General hardening that *is* safe to state: turn on GitHub **secret scanning + push
+protection**; never let tokens sit in `curl` URLs or launch-log echoes (read them
+from a `0600` file — lesson L23/L3); add `tmp/`, `*.pid`, `*.db`, `*.bak*` to
+`.gitignore` and `git rm --cached` what's already tracked (`.gitignore` does not
+untrack — lesson L30); and run `gitleaks`/`trufflehog` over full history before making
+any repo public.
 
 ---
 
@@ -66,7 +64,7 @@ incidents, almost no personal wiring. Publish as a short essay pack or a
 paste-able Execution Core block, (b) the cold-reviewer prompt, (c) the plant-test
 template (`plant:` / `expect:` / `observed:`), (d) the 3-question wiring checklist,
 (e) a before/after CLAUDE.md showing the shrink. Strip agent codenames, incident
-IDs and the owner's name; drop the "Kevlar Gold / F16 / super-agent" branding.
+IDs and the owner's name; drop the armor/aircraft/"super-agent" style branding.
 
 ---
 
@@ -174,10 +172,10 @@ are noted.
   `claude-mentor` (Claude Code internals/version reference; strip the localhost proxy
   addr), `ai-seo` (earn citations in AI answers), `book2skill` (turn a method into a
   SKILL.md), `ideas-log` / `ideas-to-project` (idea capture→triage→validated project).
-- **`_super-agents`** — a shared honesty/verification core (`00-FABLE-CORE`) prepended
-  to 19 role prompts. The reusable part is the **core**, not the 19 personas. Publish
-  the core as a role-prompt template; strip home paths, the owner's name, ERR ids and
-  the "Fable/super-agent" branding.
+- **The role-prompt system** — a shared honesty/verification core prepended to ~19
+  role prompts. The reusable part is the **core**, not the personas. Publish the core
+  as a role-prompt template; strip home paths, the owner's name, ERR ids and the
+  codename/"super-agent" branding.
 
 **Marketing/agency skills** (`fb-ads`, `google-ads`, `cold-emailing`, `copy`,
 `design-workflow`, `geo-track`) are shareable in principle but lean on business
@@ -347,8 +345,9 @@ the pre-v4 skill backups in `.v1-backup-*`, and the various `CLAUDE.md.bak-*`.
 
 ## 8. Tone-down checklist (applies everywhere)
 
-- Rename `Kevlar Gold`, `F16 Full-Spectrum`, `super-agent`, `god-mode`, `SOUL`, `brain`,
-  `clone army`, the Matrix-style codenames → plain role names (main agent, worker, reviewer).
+- Rename armor/military codenames, "super-agent"/"god-mode" labels, `SOUL`/`brain`/
+  `clone army`-style names and the Matrix-style agent names → plain role names
+  (main agent, worker, reviewer).
 - Drop unverifiable numbers: "cuts mistakes 41%→3%", "+37.7% in 8 experiments",
   LLM-self-assigned audit scores (68/91/95/100), "272 chunks fully wired".
 - Remove contradictory guidance carried across backup files (SDK vs no-SDK, API-key vs
