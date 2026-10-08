@@ -48,5 +48,5 @@ before committing anything derived from a private setup.
 
 ## License
 
-No license has been chosen yet — add one before treating this as reusable
-(and note that any third-party material stays under its original license).
+MIT, see [LICENSE](LICENSE). Any third-party material linked from here stays
+under its original license.

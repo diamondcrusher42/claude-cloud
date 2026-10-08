@@ -23,27 +23,6 @@ which are almost wiring-free and broadly useful.
 
 ---
 
-## 0. Do this first — rotate leaked credentials (handled privately)
-
-Reviewers found live secrets committed in the **private** repos — Telegram bot
-tokens (auto-filed into error logs from exception URLs), a Cloudflare API token, a
-committed browser profile with cookie/login databases, and a couple of secrets
-recorded inside resolved-incident notes. These must be rotated and purged from git
-history regardless of what gets published, because history outlives any file deletion.
-
-The exact file locations are deliberately **not listed in this public repo** — that
-would be a map to your secrets. They're in a separate private credential-rotation
-report (delivered out-of-band) with rotation steps and a `git filter-repo` recipe.
-
-General hardening that *is* safe to state: turn on GitHub **secret scanning + push
-protection**; never let tokens sit in `curl` URLs or launch-log echoes (read them
-from a `0600` file — lesson L23/L3); add `tmp/`, `*.pid`, `*.db`, `*.bak*` to
-`.gitignore` and `git rm --cached` what's already tracked (`.gitignore` does not
-untrack — lesson L30); and run `gitleaks`/`trufflehog` over full history before making
-any repo public.
-
----
-
 ## 1. Operating-model principles — the crown jewels
 
 Highest value, lowest effort to share: mostly prose, PROVEN by documented
